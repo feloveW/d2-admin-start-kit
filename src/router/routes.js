@@ -72,6 +72,16 @@ const frameIn = [
         name: 'redirect',
         hidden: true,
         component: _import('system/function/redirect')
+      },
+      // 测试页面info
+      {
+        path: '/info',
+        name: 'info',
+        component: () => import('@/pages/info'),
+        meta: {
+          auth: true,
+          title: 'info'
+        }
       }
     ]
   }
