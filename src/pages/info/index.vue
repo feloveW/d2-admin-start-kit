@@ -19,60 +19,62 @@ export default {
     }
   },
   created () {
-    this.loadTreeData()
+    // 从路由参数中获取 addr
+    this.addr = this.$route.params.addr || this.$route.query.addr
+    if (!this.addr) {
+      this.addr = '00000071'
+      // console.error('未提供 addr 参数')
+      // return
+    }
+    this.registry = this.$route.query.registry || 'service'
+    this.loadInitalData(this.addr)
   },
   methods: {
-    fetchData (url) {
-      return axios.get(url)
-        .then(response => {
-          // this.$log.push(JSON.stringify(response.data))
-          // console.log('HTTP Response:', response.data) // 在这里打印返回的数据
-          return response.data
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error)
-          throw error
-        })
-    },
-    async loadTreeData () {
-      this.fetchData('http://127.0.0.1:1999/info')
-        .then(data => {
-          this.treeData = this.transformData(data)
-          // console.log('transform data:', this.treeData) // 在这里打印返回的数据
-        })
-    },
-    async handleNodeClick (data, node) {
-      this.fetchData('http://127.0.0.1:1999/info')
-        .then(data => {
-          node.data.children = this.transformData(data)
-        })
-    },
-    async handleNodeExpand (data, node) {
-      // console.log('Expand node:', data.name)
-      this.fetchData('http://127.0.0.1:1999/info')
-        .then(data => {
-          node.data.children = this.transformData(data)
-        })
-      // this.$refs.tree.updateKeyChildren(node.data.name, transformedData) // 更新树节点
-      // console.log('updateKeyChildren:', node.data.name, data)
-    },
-    transformData (data) {
-      // 假设 data 是一个字典结构，需要转换为数组结构
-      const transform = (key, node) => {
-        const typ = Object.prototype.toString.call(node)
-        if (typ !== '[object Object]') {
-          key = key + ': ' + node
-          node = null
-        }
-        console.log('node:', key, node)
-        return {
-          name: key,
-          value: node,
-          children: node ? [{ name: '{...}', value: node }] : null
-          // children: node.children ? node.children.map(transform) : null
+    fetchData (keys) {
+      const requestBody = {
+        show: this.registry,
+        val: keys
+      }
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
         }
       }
-      return Object.keys(data).map(key => transform(key, data[key]))
+      return axios.post(`http://127.0.0.1:1999/debug?op=registry&node=game_1&addr=${this.addr}`,
+        requestBody,
+        config
+      )
+      .then(response => {
+        return response.data
+        // console.log('transform data:', this.treeData) // 在这里打印返回的数据
+      })
+
+    },
+    async loadInitalData () {
+      const data = await this.fetchData()
+      this.treeData = this.transformData(data.vals)
+    },
+    async handleNodeClick (data, node) {
+      const childData = await this.fetchData(data.keys)
+      node.data.children = this.transformData(childData.vals, data.keys)
+    },
+    transformData (data, parent_keys) {
+      // 如果 data 是空的，直接返回空数组
+      if (!data || Object.keys(data).length === 0) {
+        return []
+      }
+
+      const transform = (idx, node) => {
+        const expand = node[2] === 'table' || node[2] === 'function'
+        const keys = parent_keys ? [...parent_keys, node[0]] : [node[0]]
+        return {
+          keys: keys,
+          name: node[0] + ' :' + node[1],
+          valuetype: node[2],
+          children: expand ? [{ name: '{...}' }] : null
+        }
+      }
+      return Object.keys(data).map(idx => transform(idx, data[idx]))
     }
   }
 }

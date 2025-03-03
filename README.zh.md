@@ -24,3 +24,8 @@
 | coding | [https://d2-projects.coding.net/p/d2-projects/d/d2-admin-start-kit/git](https://d2-projects.coding.net/p/d2-projects/d/d2-admin-start-kit/git) |
 
 > 如果您在 github 仓库下载很慢，可以尝试使用我们的码云仓库克隆代码
+
+## 项目启动
+npm run dev
+或者
+npm start
