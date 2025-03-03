@@ -19,17 +19,10 @@ export default {
     }
   },
   created () {
-    // 从路由参数中获取 addr
-    this.node = this.$route.params.node || this.$route.query.node
-    if (!this.node) {
-      this.node = 'game_1'
-      // console.error('未提供 addr 参数')
-      // return
-    }
-    this.loadInitalData(this.node)
+    this.loadInitalData()
   },
   methods: {
-    fetchData (keys) {
+    fetchData () {
       const requestBody = {
       }
       const config = {
@@ -37,7 +30,7 @@ export default {
           'Content-Type': 'application/json'
         }
       }
-      return axios.post(`http://127.0.0.1:1999/debug?op=list&node=${this.node}`,
+      return axios.post(`http://127.0.0.1:1999/get_clusters`,
         requestBody,
         config
       )
@@ -49,8 +42,7 @@ export default {
     },
     async loadInitalData () {
       const data = await this.fetchData()
-      //console.log('data.list:', data.list)
-      this.treeData = this.transformData(data.list)
+      this.treeData = this.transformData(data)
     },
     transformData (data) {
       // 如果 data 是空的，直接返回空数组
@@ -58,35 +50,21 @@ export default {
         return []
       }
 
-      const transform = (idx, node) => {
+      const transform = (idx, value) => {
         return {
-          name: node.name + ' : ' + node.addr,
-          registry: node.name,
-          addr: node.addr,
-          children: [
-            {
-              name: 'registry',
-              isLink: true,  // 添加标记，用于识别可点击项
-              addr: node.addr,  // 保存addr用于跳转
-            },
-            {
-              name: 'service',
-              isLink: true,  // 添加标记，用于识别可点击项
-              addr: node.addr,  // 保存addr用于跳转
-            }
-          ]
+          name: value,
+          isLink: true,  // 添加标记表示这是可点击的链接
         }
       }
       return Object.keys(data).map(idx => transform(idx, data[idx]))
     },
     handleNodeClick(data) {
       if (data.isLink) {
-        // 使用 Vue Router 跳转到 info 页面
+        // 跳转到 list 页面，并传递必要的参数
         this.$router.push({
-          path: '/info',
+          path: '/list',
           query: {
-            addr: data.addr,
-            registry: data.name
+            node: data.name,
           }
         })
       }
