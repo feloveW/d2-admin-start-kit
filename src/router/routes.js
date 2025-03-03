@@ -73,7 +73,7 @@ const frameIn = [
         hidden: true,
         component: _import('system/function/redirect')
       },
-      // 测试页面info
+      // 查看服务内存数据
       {
         path: '/info',
         name: 'info',
@@ -81,6 +81,16 @@ const frameIn = [
         meta: {
           auth: true,
           title: 'info'
+        }
+      },
+      // 列举节点所有服务地址
+      {
+        path: '/list',
+        name: 'list',
+        component: () => import('@/pages/list'),
+        meta: {
+          auth: true,
+          title: 'list'
         }
       }
     ]

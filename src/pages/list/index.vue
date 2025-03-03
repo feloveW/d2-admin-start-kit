@@ -20,27 +20,24 @@ export default {
   },
   created () {
     // 从路由参数中获取 addr
-    this.addr = this.$route.params.addr || this.$route.query.addr
-    if (!this.addr) {
-      this.addr = '00000071'
+    this.node = this.$route.params.node || this.$route.query.node
+    if (!this.node) {
+      this.node = 'game_1'
       // console.error('未提供 addr 参数')
       // return
     }
-    this.registry = this.$route.query.registry || 'service'
-    this.loadInitalData(this.addr)
+    this.loadInitalData(this.node)
   },
   methods: {
     fetchData (keys) {
       const requestBody = {
-        show: this.registry,
-        val: keys
       }
       const config = {
         headers: {
           'Content-Type': 'application/json'
         }
       }
-      return axios.post(`http://127.0.0.1:1999/debug?op=registry&node=game_1&addr=${this.addr}`,
+      return axios.post(`http://127.0.0.1:1999/debug?op=list&node=${this.node}`,
         requestBody,
         config
       )
@@ -52,29 +49,49 @@ export default {
     },
     async loadInitalData () {
       const data = await this.fetchData()
-      this.treeData = this.transformData(data.vals)
+      //console.log('data.list:', data.list)
+      this.treeData = this.transformData(data.list)
     },
-    async handleNodeClick (data, node) {
-      const childData = await this.fetchData(data.keys)
-      node.data.children = this.transformData(childData.vals, data.keys)
-    },
-    transformData (data, parent_keys) {
+    transformData (data) {
       // 如果 data 是空的，直接返回空数组
       if (!data || Object.keys(data).length === 0) {
         return []
       }
 
       const transform = (idx, node) => {
-        const expand = node[2] === 'table' || node[2] === 'function'
-        const keys = parent_keys ? [...parent_keys, node[0]] : [node[0]]
         return {
-          keys: keys,
-          name: node[0] + ' :' + node[1],
-          valuetype: node[2],
-          children: expand ? [{ name: '{...}' }] : null
+          name: node.name + ' : ' + node.addr,
+          registry: node.name,
+          addr: node.addr,
+          children: [
+            {
+              name: 'registry',
+              isLink: true,  // 添加标记，用于识别可点击项
+              addr: node.addr,  // 保存addr用于跳转
+              url: `http://127.0.0.1:1999/debug?op=registry&node=${this.node}&addr=${node.addr}`
+            },
+            {
+              name: 'service',
+              isLink: true,  // 添加标记，用于识别可点击项
+              addr: node.addr,  // 保存addr用于跳转
+              url: `http://127.0.0.1:1999/debug?op=service&node=${this.node}&addr=${node.addr}`
+            }
+          ]
         }
       }
       return Object.keys(data).map(idx => transform(idx, data[idx]))
+    },
+    handleNodeClick(data) {
+      if (data.isLink) {
+        // 使用 Vue Router 跳转到 info 页面
+        this.$router.push({
+          path: '/info',
+          query: {
+            addr: data.addr,
+            registry: data.name
+          }
+        })
+      }
     }
   }
 }
