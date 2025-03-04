@@ -19,26 +19,27 @@ export default {
     }
   },
   created () {
+    // 从路由参数中获取 node
+    this.server = this.$route.params.server || this.$route.query.server
+    if (!this.server) {
+      this.$message.error('错误：未提供 server 参数')
+      return
+    }
     this.loadInitalData()
   },
   methods: {
     fetchData () {
-      const requestBody = {
-      }
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-      return axios.post(`http://127.0.0.1:1999/get_clusters`,
-        requestBody,
-        config
-      )
-      .then(response => {
-        return response.data
-        // console.log('transform data:', this.treeData) // 在这里打印返回的数据
-      })
-
+      console.log('开始发送请求...')
+      return axios.get(`/${this.server}/get_clusters`)
+        .then(response => {
+          console.log('请求成功:', response)
+          return response.data
+        })
+        .catch(error => {
+          console.error('请求失败:', error)
+          this.$message.error('请求失败，请检查网络连接')
+          return []
+        })
     },
     async loadInitalData () {
       const data = await this.fetchData()
@@ -65,10 +66,11 @@ export default {
           path: '/list',
           query: {
             node: data.name,
+            server: this.server
           }
         })
       }
-    }
+    },
   }
 }
 </script>

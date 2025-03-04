@@ -38,7 +38,44 @@ module.exports = {
   lintOnSave: true,
   devServer: {
     publicPath, // 和 publicPath 保持一致
-    disableHostCheck: process.env.NODE_ENV === 'development' // 关闭 host check，方便使用 ngrok 之类的内网转发工具
+    disableHostCheck: process.env.NODE_ENV === 'development', // 关闭 host check，方便使用 ngrok 之类的内网转发工具
+    proxy: {
+      '/wfl-251': {
+        target: 'http://192.168.1.251:1999',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/wfl-251': ''
+        },
+      },
+      "/bwx-250": {
+        target: 'http://192.168.1.250:1999',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/bwx-250': ''
+        },
+      },
+      "/js-33": {
+        target: 'http://192.168.1.33:1999',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/js-33': ''
+        },
+      },
+      "/bwx-wan": {
+        target: 'http://47.108.52.122:1999',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/bwx-wan': ''
+        },
+      },
+      "/bwx-fuyao": {
+        target: 'http://8.148.224.37:1999',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/bwx-fuyao': ''
+        },
+      },
+    }
   },
   css: {
     loaderOptions: {

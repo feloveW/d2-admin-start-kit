@@ -20,6 +20,11 @@ export default {
   },
   created () {
     // 从路由参数中获取 addr
+    this.server = this.$route.params.server || this.$route.query.server
+    if (!this.server) {
+      this.$message.error('错误：未提供 server 参数')
+      return
+    }
     this.addr = this.$route.params.addr || this.$route.query.addr
     if (!this.addr) {
       this.addr = '00000071'
@@ -40,7 +45,7 @@ export default {
           'Content-Type': 'application/json'
         }
       }
-      return axios.post(`http://127.0.0.1:1999/debug?op=registry&node=game_1&addr=${this.addr}`,
+      return axios.post(`/${this.server}/debug?op=registry&node=game_1&addr=${this.addr}`,
         requestBody,
         config
       )

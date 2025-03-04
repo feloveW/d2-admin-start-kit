@@ -74,6 +74,16 @@ const frameIn = [
           auth: true,
           title: 'nodes'
         }
+      },
+      // 查看所有服务器列表
+      {
+        path: '/servers',
+        name: 'servers',
+        component: () => import('@/pages/servers'),
+        meta: {
+          auth: true,
+          title: 'servers'
+        }
       }
     ]
   }

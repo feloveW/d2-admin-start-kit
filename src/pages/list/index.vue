@@ -19,12 +19,16 @@ export default {
     }
   },
   created () {
-    // 从路由参数中获取 addr
+    // 从路由参数中获取 node
+    this.server = this.$route.params.server || this.$route.query.server
+    if (!this.server) {
+      this.$message.error('错误：未提供 server 参数')
+      return
+    }
     this.node = this.$route.params.node || this.$route.query.node
     if (!this.node) {
-      this.node = 'game_1'
-      // console.error('未提供 addr 参数')
-      // return
+      this.$message.error('错误：未提供 node 参数')
+      return
     }
     this.loadInitalData(this.node)
   },
@@ -37,7 +41,7 @@ export default {
           'Content-Type': 'application/json'
         }
       }
-      return axios.post(`http://127.0.0.1:1999/debug?op=list&node=${this.node}`,
+      return axios.post(`/${this.server}/debug?op=list&node=${this.node}`,
         requestBody,
         config
       )
@@ -86,7 +90,8 @@ export default {
           path: '/info',
           query: {
             addr: data.addr,
-            registry: data.name
+            registry: data.name,
+            server: this.server
           }
         })
       }
