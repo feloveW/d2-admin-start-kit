@@ -15,7 +15,8 @@ export default {
       defaultProps: {
         children: 'children', // 假设返回的数据中子节点被命名为'children'
         label: 'name' // 假设每个节点的显示名称为'name'
-      }
+      },
+      addr: ''
     }
   },
   created () {
@@ -91,7 +92,8 @@ export default {
           query: {
             addr: data.addr,
             registry: data.name,
-            server: this.server
+            server: this.server,
+            node: this.node
           }
         })
       }

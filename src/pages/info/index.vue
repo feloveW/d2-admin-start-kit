@@ -25,11 +25,15 @@ export default {
       this.$message.error('错误：未提供 server 参数')
       return
     }
+    this.node = this.$route.params.node || this.$route.query.node
+    if (!this.node) {
+      this.$message.error('错误：未提供 node 参数')
+      return
+    }
     this.addr = this.$route.params.addr || this.$route.query.addr
     if (!this.addr) {
-      this.addr = '00000071'
-      // console.error('未提供 addr 参数')
-      // return
+      this.$message.error('错误：未提供 addr 参数')
+      return
     }
     this.registry = this.$route.query.registry || 'service'
     this.loadInitalData(this.addr)
@@ -45,7 +49,7 @@ export default {
           'Content-Type': 'application/json'
         }
       }
-      return axios.post(`/${this.server}/debug?op=registry&node=game_1&addr=${this.addr}`,
+      return axios.post(`/${this.server}/debug?op=registry&node=${this.node}&addr=${this.addr}`,
         requestBody,
         config
       )
@@ -63,7 +67,7 @@ export default {
       const childData = await this.fetchData(data.keys)
       node.data.children = this.transformData(childData.vals, data.keys)
     },
-    transformData (data, parent_keys) {
+    transformData (data, parentKeys) {
       // 如果 data 是空的，直接返回空数组
       if (!data || Object.keys(data).length === 0) {
         return []
@@ -71,7 +75,7 @@ export default {
 
       const transform = (idx, node) => {
         const expand = node[2] === 'table' || node[2] === 'function'
-        const keys = parent_keys ? [...parent_keys, node[0]] : [node[0]]
+        const keys = parentKeys ? [...parentKeys, node[0]] : [node[0]]
         return {
           keys: keys,
           name: node[0] + ' :' + node[1],
@@ -80,6 +84,9 @@ export default {
         }
       }
       return Object.keys(data).map(idx => transform(idx, data[idx]))
+    },
+    handleClick(data) {
+      console.log(data)
     }
   }
 }

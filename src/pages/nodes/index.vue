@@ -15,7 +15,10 @@ export default {
       defaultProps: {
         children: 'children', // 假设返回的数据中子节点被命名为'children'
         label: 'name' // 假设每个节点的显示名称为'name'
-      }
+      },
+      columns: [
+        // ...
+      ]
     }
   },
   created () {
